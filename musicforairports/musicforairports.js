@@ -82,23 +82,32 @@ function getSample(instrument, noteAndOctave) {
     }));
 }
 
-function playSample(instrument, note) {
+function playSample(instrument, note, delaySeconds = 0) {
 	getSample(instrument, note).then(({audioBuffer, distance}) => {
 		let playbackRate = Math.pow(2, distance / 12);
 		let bufferSource = audioContext.createBufferSource();
 		bufferSource.buffer = audioBuffer;
 		bufferSource.playbackRate.value = playbackRate;
 		bufferSource.connect(audioContext.destination);
-		bufferSource.start();
+		bufferSource.start(audioContext.currentTime + delaySeconds);
 	});
+}
+
+function startLoop(instrument, note, loopLengthSeconds, delaySeconds) {
+    playSample(instrument, note, delaySeconds);
+    setInterval(
+        () => playSample(instrument, note, delaySeconds), 
+        loopLengthSeconds * 1000
+    );
 }
 
 
 //Test out the pitch sampler
-setTimeout(() => playSample("Vibraphone", "F4"),  1000);
-setTimeout(() => playSample("Vibraphone", "Ab4"), 2000);
-setTimeout(() => playSample("Vibraphone", "C5"),  3000);
-setTimeout(() => playSample("Vibraphone", "Db5"), 4000);
-setTimeout(() => playSample("Vibraphone", "Eb5"), 5000);
-setTimeout(() => playSample("Vibraphone", "F5"),  6000);
-setTimeout(() => playSample("Vibraphone", "Ab5"), 7000);
+// setTimeout(() => playSample("Vibraphone", "F4"),  1000);
+// setTimeout(() => playSample("Vibraphone", "Ab4"), 2000);
+// setTimeout(() => playSample("Vibraphone", "C5"),  3000);
+// setTimeout(() => playSample("Vibraphone", "Db5"), 4000);
+// setTimeout(() => playSample("Vibraphone", "Eb5"), 5000);
+// setTimeout(() => playSample("Vibraphone", "F5"),  6000);
+// setTimeout(() => playSample("Vibraphone", "Ab5"), 7000);
+startLoop("Vibraphone", "C4", 20, 5);
