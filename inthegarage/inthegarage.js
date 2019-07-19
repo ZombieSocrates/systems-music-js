@@ -6,8 +6,8 @@ function startLoop(audioBuffer, pan = 0, rate = 1) {
 
   sourceNode.buffer = audioBuffer;
   sourceNode.loop = true;
-  sourceNode.loopStart = 0.85; //0.85
-  sourceNode.loopEnd = 10.53; //10.53
+  sourceNode.loopStart = 0.85; 
+  sourceNode.loopEnd = 10.53; 
   sourceNode.playbackRate.value = rate;
   pannerNode.pan.value = pan;
 
@@ -22,6 +22,9 @@ fetch("inthegarage.mp3")
   .then(arrayBuffer => audioContext.decodeAudioData(arrayBuffer))
   .then(audioBuffer => {
   	startLoop(audioBuffer, pan = -1);
-    startLoop(audioBuffer, pan = 1, rate = 1.002); //rate = 1.002
+    startLoop(audioBuffer, pan = 1, rate = 1.002); 
   })
   .catch(e => console.error(e));
+
+
+//TODO: Get a .wav file of the opening to SVU and loop "these are their stories"

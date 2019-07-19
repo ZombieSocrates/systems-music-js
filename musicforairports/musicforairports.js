@@ -82,24 +82,25 @@ function getSample(instrument, noteAndOctave) {
     }));
 }
 
-function playSample(instrument, note, delaySeconds = 0) {
+function playSample(instrument, note, destination, delaySeconds = 0) {
 	getSample(instrument, note).then(({audioBuffer, distance}) => {
 		let playbackRate = Math.pow(2, distance / 12);
 		let bufferSource = audioContext.createBufferSource();
 		bufferSource.buffer = audioBuffer;
 		bufferSource.playbackRate.value = playbackRate;
-		bufferSource.connect(audioContext.destination);
+		bufferSource.connect(destination);
 		bufferSource.start(audioContext.currentTime + delaySeconds);
 	});
 }
 
-function startLoop(instrument, note, loopLengthSeconds, delaySeconds) {
-    playSample(instrument, note, delaySeconds);
+function startLoop(instrument, note, destination, loopLengthSeconds, delaySeconds) {
+    playSample(instrument, note, destination, delaySeconds);
     setInterval(
-        () => playSample(instrument, note, delaySeconds), 
+        () => playSample(instrument, note, destination, delaySeconds), 
         loopLengthSeconds * 1000
     );
 }
+
 
 
 //Test out the pitch sampler
@@ -110,4 +111,21 @@ function startLoop(instrument, note, loopLengthSeconds, delaySeconds) {
 // setTimeout(() => playSample("Vibraphone", "Eb5"), 5000);
 // setTimeout(() => playSample("Vibraphone", "F5"),  6000);
 // setTimeout(() => playSample("Vibraphone", "Ab5"), 7000);
-startLoop("Vibraphone", "C4", 20, 5);
+
+
+//Pass each note through the convolver in loops with seven random lengths and offsets
+fetchSample("AirportTerminal.wav").then(convolverBuffer => {
+
+    let convolver = audioContext.createConvolver();
+    convolver.buffer = convolverBuffer;
+    convolver.connect(audioContext.destination);
+
+    startLoop("Vibraphone", "F4", convolver, 18.1, 7.6);
+    startLoop("Vibraphone", "Ab4", convolver, 20.2, 5.4);
+    startLoop("Vibraphone", "C5", convolver, 17.6, 3.1);
+    startLoop("Vibraphone", "Db5", convolver, 19.8, 8.5);
+    startLoop("Vibraphone", "Eb5", convolver, 16.3, 4.2);
+    startLoop("Vibraphone", "F5", convolver, 21.0, 6.8);
+    startLoop("Vibraphone", "Ab5", convolver, 15.2, 7.2);
+
+})
