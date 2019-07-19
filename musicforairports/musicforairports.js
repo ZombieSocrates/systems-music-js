@@ -30,6 +30,8 @@ const SAMPLE_LIBRARY = {
 
 const OCTAVE = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 
+const PITCHES = ["F4", "Ab4", "C5", "Db5", "Eb5", "F5", "Ab5"];
+
 let audioContext = new AudioContext();
 
 function noteValue(note, octave) {
@@ -101,7 +103,11 @@ function startLoop(instrument, note, destination, loopLengthSeconds, delaySecond
     );
 }
 
-
+function getRandomBetween(min, max, decimalPlaces = 1) {
+    let multiplier = Math.pow(10, decimalPlaces || 0);
+    let scalar = Math.random() * (max - min) + min;
+    return Math.round(scalar * multiplier) / multiplier;
+}
 
 //Test out the pitch sampler
 // setTimeout(() => playSample("Vibraphone", "F4"),  1000);
@@ -113,19 +119,35 @@ function startLoop(instrument, note, destination, loopLengthSeconds, delaySecond
 // setTimeout(() => playSample("Vibraphone", "Ab5"), 7000);
 
 
-//Pass each note through the convolver in loops with seven random lengths and offsets
+//Pass each note through the convolver in loops with preset durations and offsets
+// fetchSample("AirportTerminal.wav").then(convolverBuffer => {
+
+//     let convolver = audioContext.createConvolver();
+//     convolver.buffer = convolverBuffer;
+//     convolver.connect(audioContext.destination);
+
+//     startLoop("Vibraphone", "F4", convolver, 18.1, 7.6);
+//     startLoop("Vibraphone", "Ab4", convolver, 20.2, 5.4);
+//     startLoop("Vibraphone", "C5", convolver, 17.6, 3.1);
+//     startLoop("Vibraphone", "Db5", convolver, 19.8, 8.5);
+//     startLoop("Vibraphone", "Eb5", convolver, 16.3, 4.2);
+//     startLoop("Vibraphone", "F5", convolver, 21.0, 6.8);
+//     startLoop("Vibraphone", "Ab5", convolver, 15.2, 7.2);
+
+// })
+
+//Pass each note through the covolver, but choose duration and offset randomly
 fetchSample("AirportTerminal.wav").then(convolverBuffer => {
 
     let convolver = audioContext.createConvolver();
     convolver.buffer = convolverBuffer;
     convolver.connect(audioContext.destination);
 
-    startLoop("Vibraphone", "F4", convolver, 18.1, 7.6);
-    startLoop("Vibraphone", "Ab4", convolver, 20.2, 5.4);
-    startLoop("Vibraphone", "C5", convolver, 17.6, 3.1);
-    startLoop("Vibraphone", "Db5", convolver, 19.8, 8.5);
-    startLoop("Vibraphone", "Eb5", convolver, 16.3, 4.2);
-    startLoop("Vibraphone", "F5", convolver, 21.0, 6.8);
-    startLoop("Vibraphone", "Ab5", convolver, 15.2, 7.2);
+    console.log("Music for Airports 2/1");
+    PITCHES.forEach(function(pitch) {
+        let duration = getRandomBetween(16, 23);
+        let offset = getRandomBetween(1.5, 12);
+        startLoop("Vibraphone", pitch, convolver, duration, offset);
+    })
 
 })
