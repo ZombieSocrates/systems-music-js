@@ -14,6 +14,7 @@ function makeSynth() {
 
 	return new Tone.DuoSynth({
 		harmonicity: 1,
+		volume: -20,
 		voice0: {
 			oscillator: {type: "sawtooth"},
 			envelope,
@@ -33,15 +34,29 @@ function makeSynth() {
 let leftSynth = makeSynth();
 let rightSynth = makeSynth();
 
-let leftPanner = new Tone.Panner(-0.5).toMaster();
-let rightPanner = new Tone.Panner(0.5).toMaster();
+let leftPanner = new Tone.Panner(-0.5);
+let rightPanner = new Tone.Panner(0.5);
+// Wait one 16th note before beginning the echo, and feedback in 20% of the original signal
+let echo = new Tone.FeedbackDelay("16n", 0.2)
+let delay = Tone.context.createDelay(6.0);
+let delayFade = Tone.context.createGain();
+
+delay.delayTime.value = 6.0;
+delayFade.gain.value= 0.75;
 
 leftSynth.connect(leftPanner);
 rightSynth.connect(rightPanner);
+leftPanner.connect(echo);
+rightPanner.connect(echo);
+echo.toMaster();
+echo.connect(delay);
+delay.connect(Tone.context.destination);
+delay.connect(delayFade);
+delayFade.connect(delay);
 
 new Tone.Loop(time => {
   // Trigger C5 and hold for a full one measure and two beats
-   // Switch to note D5 after two beats without retriggering
+  // Switch to note D5 after two beats without retriggering
   leftSynth.triggerAttackRelease("C5", "1:2", time);
   leftSynth.setNote("D5", "+0:2");
 
@@ -75,5 +90,5 @@ new Tone.Loop(time => {
 }, "37m").start();
 
 
-Tone.Transport.bpm.value = 240;
+Tone.Transport.bpm.value = 120;
 Tone.Transport.start();
