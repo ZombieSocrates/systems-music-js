@@ -41,9 +41,8 @@ rightSynth.connect(rightPanner);
 
 new Tone.Loop(time => {
   // Trigger C5 and hold for a full one measure and two beats
+   // Switch to note D5 after two beats without retriggering
   leftSynth.triggerAttackRelease("C5", "1:2", time);
-
-  // Switch to note D5 after two beats without retriggering
   leftSynth.setNote("D5", "+0:2");
 
   // Trigger E4 after 6 measures and hold for two 1/4 notes.
@@ -61,8 +60,18 @@ new Tone.Loop(time => {
 }, "34m").start();
 
 new Tone.Loop(time => {
-  // // Trigger one quarter note from now, and hold for one eighth note
-  // synth.triggerAttackRelease("C4", "8n", "+4n");
+  // Trigger D4 after 5 measures and hold for 1 full measure + two 1/4 notes
+  // Switch to E4 after one more measure
+  rightSynth.triggerAttackRelease("D4", "1:2", "+5:0");
+  rightSynth.setNote("E4","+6:0");
+
+  // Trigger B3 after 11 measures + two 1/4 notes + two 1/16 notes. Hold for one measure
+  // Switch to G3 after a 1/2 note more
+  rightSynth.triggerAttackRelease("B3", "1:0", "+11:2:2");
+  rightSynth.setNote("G3", "+12:0:2");
+
+  // Trigger G4 after 23 measures + two 1/4 notes. Hold for a half note.
+  rightSynth.triggerAttackRelease("G4", "0:2", "+23:2");
 }, "37m").start();
 
 
