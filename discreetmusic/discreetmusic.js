@@ -1,3 +1,8 @@
+const EQUALIZER_CENTER_FREQUENCIES = [
+  100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000, 1250,
+  1600, 2000, 2500, 3150, 4000, 5000, 6300, 8000, 10000
+];
+
 function makeSynth() {
 	let envelope = {
 		attack: 0.1,
@@ -31,11 +36,51 @@ function makeSynth() {
 }
 
 
+function initEqualizerUI(container, equalizer) {
+	equalizer.forEach(equalizerBand => {
+		let frequency = equalizerBand.frequency.value;
+		let wrapper = document.createElement("div");
+		let slider = document.createElement("div");
+		let label = document.createElement("label");
+
+		wrapper.classList.add("slider-wrapper");
+		slider.classList.add("slider");
+		label.textContent = frequency >= 1000 ? `${frequency/1000}K` : frequency;
+
+		noUiSlider.create(slider, {
+			start: 0,					// intial gain is 0 dB
+			range: {min:-12, max:12},	// Allowed gain range is +/- 12 dB
+			step: 0.1,					// Adjustments are made in 0.1 dB increments
+			orientation: "vertical",	// The slider buttons are vertical
+			direction: "rtl",			// -12 dB at the bottom, +12 dB at the top
+		})
+        slider.noUiSlider.on("update", ([value]) => {
+        	let gain = +value;
+        	equalizerBand.gain.value = gain;
+        })
+
+
+		wrapper.appendChild(slider);
+		wrapper.appendChild(label);
+		container.appendChild(wrapper);
+	})
+}
+
+
 let leftSynth = makeSynth();
 let rightSynth = makeSynth();
 
 let leftPanner = new Tone.Panner(-0.5);
 let rightPanner = new Tone.Panner(0.5);
+let equalizer = EQUALIZER_CENTER_FREQUENCIES.map(frequency => {
+  let filter = Tone.context.createBiquadFilter();
+  filter.type = "peaking";
+  filter.frequency.value = frequency;
+  filter.Q.value = 4.31;
+  filter.gain.value = 0;
+  return filter
+})
+
 // Wait one 16th note before beginning the echo, and feedback in 20% of the original signal
 let echo = new Tone.FeedbackDelay("16n", 0.2)
 let delay = Tone.context.createDelay(6.0);
@@ -46,8 +91,16 @@ delayFade.gain.value= 0.75;
 
 leftSynth.connect(leftPanner);
 rightSynth.connect(rightPanner);
-leftPanner.connect(echo);
-rightPanner.connect(echo);
+leftPanner.connect(equalizer[0]);
+rightPanner.connect(equalizer[0]);
+equalizer.forEach((equalizerBand, index) => {
+	if (index < equalizer.length - 1) {
+		equalizerBand.connect(equalizer[index + 1]);
+	} else {
+		// You're at the last band. Connect it to the echo
+		equalizerBand.connect(echo)
+	}
+});
 echo.toMaster();
 echo.connect(delay);
 delay.connect(Tone.context.destination);
@@ -92,3 +145,4 @@ new Tone.Loop(time => {
 
 Tone.Transport.bpm.value = 120;
 Tone.Transport.start();
+initEqualizerUI(document.querySelector(".eq"), equalizer);

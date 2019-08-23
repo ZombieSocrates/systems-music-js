@@ -5,3 +5,4 @@ Using the Javascript Audio API to re-create Minimalist classics. Basically just 
 
 - Add sources for the audio files to this README
 - Should consider .gitignoring them
+- Implement the cycle visualizations he uses on the blog itself within the index.html for each piece
